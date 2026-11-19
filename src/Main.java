@@ -3,10 +3,8 @@ public class Main {
         try {
             if (args.length != 1) throw new IllegalArgumentException("Usage: ./run.sh <config.csv>");
             Config config = new Config(args[0]);
-            MavenRepository repository = new MavenRepository(config.values.get("repository"));
-            for (String dependency : repository.dependencies(config.values.get("package"), config.values.get("version"))) {
-                System.out.println(dependency);
-            }
+            Graph graph = new Graph(config);
+            graph.edges.forEach((name, dependencies) -> System.out.println(name + " -> " + dependencies));
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);
