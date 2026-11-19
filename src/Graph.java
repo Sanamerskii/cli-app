@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Graph {
     public final Map<String, List<String>> edges = new LinkedHashMap<>();
@@ -53,5 +55,23 @@ public class Graph {
             throw new IllegalArgumentException("Cannot resolve Maven dependency version: " + name);
         }
         return repository.dependencies(parts[0] + ":" + parts[1], parts[2]);
+    }
+
+    public List<String> loadOrder() {
+        List<String> order = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        Set<String> active = new HashSet<>();
+        for (String name : edges.keySet()) appendOrder(name, visited, active, order);
+        return order;
+    }
+
+    private void appendOrder(String name, Set<String> visited, Set<String> active, List<String> order) {
+        if (active.contains(name)) throw new IllegalArgumentException("Cyclic dependency: " + name);
+        if (visited.contains(name)) return;
+        active.add(name);
+        for (String dependency : edges.get(name)) appendOrder(dependency, visited, active, order);
+        active.remove(name);
+        visited.add(name);
+        order.add(name);
     }
 }
